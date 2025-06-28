@@ -1,0 +1,71 @@
+#! /usr/bin/env python3
+
+import torch
+import whisperx
+import datetime
+
+# --- Begin Recommended Device Selection Logic ---
+
+# Determine the appropriate device for each component of the pipeline
+# This logic is based on the known stability and support of the dependencies.
+if torch.backends.mps.is_available():
+    # Running on an Apple Silicon Mac with MPS support.
+    # ASR (via CTranslate2) must run on CPU as there is no Metal backend.
+    asr_device = "cpu"
+    # Diarization (via pyannote.audio) is unstable on MPS and must run on CPU.
+    diarization_device = "cpu"
+    # Alignment (via torch/torchaudio) is more likely to be stable on MPS.
+    # This can be tested, with CPU as a safe fallback.
+    # alignment_device = "mps" # got error Output channels > 65536 not supported at the MPS device. 
+    alignment_device = "cpu"
+elif torch.cuda.is_available():
+    # Running on a standard CUDA-enabled machine.
+    asr_device = "cuda"
+    diarization_device = "cuda"
+    alignment_device = "cuda"
+else:
+    # Fallback for other systems (e.g., Windows/Linux without NVIDIA GPU).
+    asr_device = "cpu"
+    diarization_device = "cpu"
+    alignment_device = "cpu"
+
+print(f"ASR device: {asr_device}")
+print(f"Diarization device: {diarization_device}")
+print(f"Alignment device: {alignment_device}")
+
+# --- End Recommended Device Selection Logic ---
+
+# --- Example Usage within the whisperX pipeline ---
+
+audio_file = "path/to/your/audio.wav"
+audio_file = "lecun_20min.mp3"
+compute_type = "int8" if asr_device == "cpu" else "float16"
+
+print(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+print("===transcribe start")
+# 1. Transcribe
+# The asr_device will be "cpu" on a Mac.
+model = whisperx.load_model("large-v2", asr_device, compute_type=compute_type)
+result = model.transcribe(audio_file, batch_size=16)
+print("===transcribe end")
+
+# 2. Align
+# The alignment_device will be "mps" on a Mac.
+# If this proves unstable, change alignment_device to "cpu".
+print(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+print("===align start")
+model_a, metadata = whisperx.load_align_model(language_code=result["language"], device=alignment_device)
+result = whisperx.align(result["segments"], model_a, metadata, audio_file, alignment_device, return_char_alignments=False)
+print("===align end")
+
+# 3. Diarize
+# The diarization_device will be "cpu" on a Mac.
+print(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+print("===diarize start")
+diarize_model = whisperx.diarize.DiarizationPipeline(use_auth_token="YOUR_HF_TOKEN", device=diarization_device)
+diarize_segments = diarize_model(audio_file)
+result = whisperx.assign_word_speakers(diarize_segments, result)
+print("===diarize end")
+
+print(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+print(result["segments"])
