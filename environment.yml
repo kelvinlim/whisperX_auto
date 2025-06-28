@@ -1,0 +1,6 @@
+name: whisperx_mac
+channels:
+  - defaults
+dependencies:
+  - python=3.10
+prefix: /Users/kolim/miniconda3/envs/whisperx_mac

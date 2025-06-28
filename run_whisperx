@@ -69,3 +69,9 @@ print("===diarize end")
 
 print(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
 print(result["segments"])
+
+# write out the result
+fileout = "lecun_20min_whisperx.json"
+import json
+with open(fileout, "w") as f:
+    json.dump(result, f, indent=2 )
