@@ -40,12 +40,14 @@ print(f"Alignment device: {alignment_device}")
 audio_file = "path/to/your/audio.wav"
 audio_file = "lecun_20min.mp3"
 compute_type = "int8" if asr_device == "cpu" else "float16"
+threads = 16
 
 print(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
 print("===transcribe start")
 # 1. Transcribe
 # The asr_device will be "cpu" on a Mac.
-model = whisperx.load_model("large-v2", asr_device, compute_type=compute_type)
+model = whisperx.load_model("large-v2", asr_device, compute_type=compute_type,
+                            threads=threads, language="en")
 result = model.transcribe(audio_file, batch_size=16)
 print("===transcribe end")
 
@@ -68,7 +70,7 @@ result = whisperx.assign_word_speakers(diarize_segments, result)
 print("===diarize end")
 
 print(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
-print(result["segments"])
+# print(result["segments"])
 
 # write out the result
 fileout = "lecun_20min_whisperx.json"
