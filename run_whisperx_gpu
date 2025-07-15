@@ -3,6 +3,10 @@
 import torch
 import whisperx
 import datetime
+from dotenv import load_dotenv, dotenv_values
+
+# get the HF_TOKEN
+config = dotenv_values("/home/kolim/.env_hftoken")
 
 # --- Begin Recommended Device Selection Logic ---
 
@@ -40,7 +44,7 @@ print(f"Alignment device: {alignment_device}")
 audio_file = "path/to/your/audio.wav"
 audio_file = "lecun_20min.mp3"
 compute_type = "int8" if asr_device == "cpu" else "int8"
-threads = 2
+threads = 16
 
 print(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
 print("===transcribe start")
@@ -64,7 +68,7 @@ print("===align end")
 # The diarization_device will be "cpu" on a Mac.
 print(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
 print("===diarize start")
-diarize_model = whisperx.diarize.DiarizationPipeline(use_auth_token="YOUR_HF_TOKEN", device=diarization_device)
+diarize_model = whisperx.diarize.DiarizationPipeline(use_auth_token=config['HF_TOKEN'], device=diarization_device)
 diarize_segments = diarize_model(audio_file)
 result = whisperx.assign_word_speakers(diarize_segments, result)
 print("===diarize end")
