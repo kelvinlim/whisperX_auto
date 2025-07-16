@@ -1,12 +1,31 @@
 #! /usr/bin/env python3
 
+import os
+import platform
+import pwd
 import torch
 import whisperx
 import datetime
 from dotenv import load_dotenv, dotenv_values
 
 # get the HF_TOKEN
-config = dotenv_values("/home/kolim/.env_hftoken")
+token_file = '.env_hftoken'
+
+# get the user
+user = pwd.getpwuid(os.getuid()).pw_name
+
+# determine path based on os and user
+if platform.system() == "Darwin":
+    # get the user account
+    # home_dir is /Users/<user>
+    home_dir = f"/Users/{user}"
+else:
+    # get the user account
+    # home_dir is /home/<user>
+    home_dir = f"/home/{user}"
+    
+token_path = f"{home_dir}/{token_file}"
+config = dotenv_values(token_path)
 
 # --- Begin Recommended Device Selection Logic ---
 
