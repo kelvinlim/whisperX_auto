@@ -21,8 +21,7 @@ if platform.system() == "Darwin":
     home_dir = f"/Users/{user}"
 else:
     # get the user account
-    # home_dir is /home/<user>
-    home_dir = f"/home/{user}"
+    home_dir = os.path.expanduser('~')
     
 token_path = f"{home_dir}/{token_file}"
 # check if token_path exists
@@ -67,7 +66,7 @@ audio_file = "lecun_20min.mp3"
 compute_type = "int8" if asr_device == "cpu" else "int8"
 
 threads = 16
-batch_size = 4 # default is 16
+batch_size = 16 # default is 16
 
 print(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
 print("===transcribe start")

@@ -67,73 +67,24 @@ sys     0m10.631s
 
 ```
 
-## On wsl with gtx1660
-
+## MSI
 ```
-NVIDIA GeForce GTX 1660 
+# did download for cudnn 9 from nvidia, stored
+# in /home/limko/kolim/local
+# https://developer.nvidia.com/cudnn-downloads?target_os=Linux&target_arch=x86_64&Distribution=Agnostic&cuda_version=12
 
-(whisperx_auto) kolim@DESKTOP-7KIDSEU:~/Projects/whisperX_auto$ time ./run_whisperx_gpu 
-ASR device: cuda
-Diarization device: cuda
-Alignment device: cuda
-2025-07-23 07:06:39
-===transcribe start
->>Performing voice activity detection using Pyannote...
-Lightning automatically upgraded your loaded checkpoint from v1.5.4 to v2.5.2. To apply the upgrade to your files permanently, run `python -m pytorch_lightning.utilities.upgrade_checkpoint whisperx/assets/pytorch_model.bin`
-Model was trained with pyannote.audio 0.0.1, yours is 3.3.2. Bad things might happen unless you revert pyannote.audio to 0.x.
-Model was trained with torch 1.10.0+cu102, yours is 2.5.1. Bad things might happen unless you revert torch to 1.x.
-/home/kolim/anaconda3/envs/whisperx_auto/lib/python3.12/site-packages/pyannote/audio/utils/reproducibility.py:74: ReproducibilityWarning: TensorFloat-32 (TF32) has been disabled as it might lead to reproducibility issues and lower accuracy.
-It can be re-enabled by calling
-   >>> import torch
-   >>> torch.backends.cuda.matmul.allow_tf32 = True
-   >>> torch.backends.cudnn.allow_tf32 = True
-See https://github.com/pyannote/pyannote-audio/issues/1370 for more details.
+# Set the path to your local cuDNN installation
+export CUDNN_PATH="/home/limko/kolim/local/cudnn-linux-x86_64-9.11.0.98_cuda12-archive"
 
-  warnings.warn(
-===transcribe end
-2025-07-23 07:08:02
-===align start
-===align end
-2025-07-23 07:08:30
-===diarize start
-/home/kolim/anaconda3/envs/whisperx_auto/lib/python3.12/site-packages/pyannote/audio/models/blocks/pooling.py:104: UserWarning: std(): degrees of freedom is <= 0. Correction should be strictly less than the reduction factor (input numel divided by output numel). (Triggered internally at /opt/conda/conda-bld/pytorch_1729647378361/work/aten/src/ATen/native/ReduceOps.cpp:1823.)
-  std = sequences.std(dim=-1, correction=1)
-===diarize end
-2025-07-23 07:10:25
+# Add the cuDNN include directory to CPATH
+export CPATH="$CUDNN_PATH/include:$CPATH"
 
-real    3m50.282s
-user    4m45.294s
-sys     0m13.546s
-(whisperx_auto) kolim@DESKTOP-7KIDSEU:~/Projects/whisperX_auto$ nvidia-smi
-Wed Jul 23 07:11:00 2025       
-+-----------------------------------------------------------------------------------------+
-| NVIDIA-SMI 560.35.02              Driver Version: 560.94         CUDA Version: 12.6     |
-|-----------------------------------------+------------------------+----------------------+
-| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |
-| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |
-|                                         |                        |               MIG M. |
-|=========================================+========================+======================|
-|   0  NVIDIA GeForce GTX 1660        On  |   00000000:09:00.0  On |                  N/A |
-| 40%   46C    P8             11W /  130W |     560MiB /   6144MiB |      1%      Default |
-|                                         |                        |                  N/A |
-+-----------------------------------------+------------------------+----------------------+
-                                                                                         
-+-----------------------------------------------------------------------------------------+
-| Processes:                                                                              |
-|  GPU   GI   CI        PID   Type   Process name                              GPU Memory |
-|        ID   ID                                                               Usage      |
-|=========================================================================================|
-|  No running processes found                                                             |
-+-----------------------------------------------------------------------------------------+
-(whisperx_auto) kolim@DESKTOP-7KIDSEU:~/Projects/whisperX_auto$ 
+# Add the cuDNN library directory to LD_LIBRARY_PATH
+export LD_LIBRARY_PATH="$CUDNN_PATH/lib:$LD_LIBRARY_PATH"
 
-batchsize = 4
-File produced is wrong!  All words are you in result['segments']
-
-batchsize=16
-CUDA failed with error out of memory
-
-batch_size = 8 - all you
-
-batch_size = 10
+# need to load modules
+module load cuda/12.0 ffmpeg 
+# unload python if it got loaded automatically so we use
+# the version in our conda environment
+module unload python 
 ```
