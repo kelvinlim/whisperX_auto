@@ -25,6 +25,8 @@ else:
     home_dir = f"/home/{user}"
     
 token_path = f"{home_dir}/{token_file}"
+# check if token_path exists
+
 config = dotenv_values(token_path)
 
 # --- Begin Recommended Device Selection Logic ---
@@ -63,7 +65,9 @@ print(f"Alignment device: {alignment_device}")
 audio_file = "path/to/your/audio.wav"
 audio_file = "lecun_20min.mp3"
 compute_type = "int8" if asr_device == "cpu" else "int8"
+
 threads = 16
+batch_size = 12 # default is 16
 
 print(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
 print("===transcribe start")
@@ -71,7 +75,7 @@ print("===transcribe start")
 # The asr_device will be "cpu" on a Mac.
 model = whisperx.load_model("large-v2", asr_device, compute_type=compute_type,
                             threads=threads, language="en")
-result = model.transcribe(audio_file, batch_size=16)
+result = model.transcribe(audio_file, batch_size=batch_size)
 print("===transcribe end")
 
 # 2. Align
