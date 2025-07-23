@@ -67,7 +67,7 @@ audio_file = "lecun_20min.mp3"
 compute_type = "int8" if asr_device == "cpu" else "int8"
 
 threads = 16
-batch_size = 12 # default is 16
+batch_size = 4 # default is 16
 
 print(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
 print("===transcribe start")
